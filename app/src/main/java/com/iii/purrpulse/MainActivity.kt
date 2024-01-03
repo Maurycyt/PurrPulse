@@ -1,6 +1,7 @@
 package com.iii.purrpulse
 
 import android.os.Bundle
+import android.widget.Button
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -8,6 +9,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.iii.purrpulse.databinding.ActivityMainBinding
+import android.content.Intent
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,5 +33,16 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        val libGDXLauncherBtn : Button = findViewById(R.id.libGDXLauncherBtn) as Button
+
+        libGDXLauncherBtn.setOnClickListener {
+            launchlibGDX()
+        }
+    }
+
+    fun launchlibGDX() {
+            val intent = Intent(this, Launcher::class.java)
+            startActivity(intent)
     }
 }

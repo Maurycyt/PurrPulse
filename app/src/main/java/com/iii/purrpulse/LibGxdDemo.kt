@@ -7,13 +7,12 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-
-/*
- * @author: rafalgolarz.com
- */
+import com.badlogic.gdx.Input
+import com.badlogic.gdx.InputProcessor
 
 
 class LibGdxDemo : ApplicationAdapter() {
+
     private lateinit var batch: SpriteBatch
     private lateinit var img: Texture
     private lateinit var font: BitmapFont
@@ -22,6 +21,8 @@ class LibGdxDemo : ApplicationAdapter() {
         batch = SpriteBatch()
         font = BitmapFont()
     }
+
+    var count = 0;
 
     override fun render() {
         Gdx.gl.glClearColor(1f, 0f, 0f, 1f)
@@ -33,10 +34,18 @@ class LibGdxDemo : ApplicationAdapter() {
 
         font.draw(batch, "Hello", 50f, 400f)
         batch.end()
+
+        count += 1
+        if (count > 100) {
+            count = 0
+            Gdx.app.exit()
+        }
     }
 
     override fun dispose() {
         batch.dispose()
-        img.dispose()
+//        img.dispose()
     }
+
+
 }

@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun launchlibGDX() {
-            val intent = Intent(this, Launcher::class.java)
-            startActivity(intent)
+        val intent = Intent(this, Launcher::class.java)
+        startActivity(intent)
     }
 }

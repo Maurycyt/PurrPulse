@@ -28,23 +28,28 @@ fun fragment_shader() =
     #endif
     
     const int n = ${point_count};
+    const float threshold = 1.2;
     
     uniform vec2 u_positions[n];
     uniform vec3 u_colors[n];
             
     void main() {
         vec2 position = gl_FragCoord.xy;
-        float total_dist = 0.0;
-        vec3 final_color = vec3(0.1, 0.1, 0.1);
-        for (int i = 0; i < n; i++) {
-            float dist = distance(u_positions[i], position);
-            total_dist += (1.0 / (1.0 + dist * dist * dist * dist ));
+        float min_dist = distance(u_positions[0], position);
+        for (int i = 1; i < n; i++) {
+            if (distance(u_positions[i], position) < min_dist) {
+                min_dist = distance(u_positions[i], position);
+            }
         }
-        total_dist *= 1.25;
+        float counter = 0.0;
+        vec3 total_color = vec3(0.0, 0.0, 0.0);
         for (int i = 0; i < n; i++) {
-            float dist = distance(u_positions[i], position);
-            final_color += u_colors[i] * ((1.0 / (1.0 + dist * dist * dist * dist))/total_dist);
+            if (distance(u_positions[i], position) < min_dist * threshold) {
+                total_color += u_colors[i];
+                counter += 1.0;
+            }
         }
+        vec3 final_color = vec3(total_color.x/counter, total_color.y/counter, total_color.z/counter);
         gl_FragColor = vec4(final_color, 1.0);
     }
     """.trimIndent()

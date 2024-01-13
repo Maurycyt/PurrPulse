@@ -18,7 +18,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import kotlin.math.max
 import kotlin.math.min
-import com.iii.purrpulse.luancher_mode
+import com.iii.purrpulse.launcher_mode
 import com.iii.purrpulse.LauncherMode
 
 val point_count: Int = 50
@@ -27,6 +27,7 @@ var position_array = FloatArray(point_count * 2);
 var color_array = FloatArray(point_count * 3)
 
 val use_highp = false
+var delete_closest = false
 
 fun light_shader() =
     """
@@ -199,11 +200,27 @@ class MyController : InputProcessor {
         touching = true
         val new_point = Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId)
         new_point.velocity = Vector2(MathUtils.random()*5, MathUtils.random()*5)
-        point_list.addFirst(new_point)
         nextPointId += 1
-        if (point_list.size > point_count) {
-            point_list.removeLast()
+
+        if (point_list.size > point_count - 1) {
+            if (delete_closest) {
+                var candidate = point_list.get(0)
+                var min_dist = new_point.pos.cpy().sub(candidate.pos).len2()
+                for (point in point_list) {
+                    var point_dist = new_point.pos.cpy().sub(point.pos).len2()
+                    if (point_dist < min_dist) {
+                        min_dist = point_dist
+                        candidate = point
+                    }
+                }
+                point_list.remove(candidate)
+            }
+            else {
+                point_list.removeLast()
+            }
         }
+
+        point_list.addFirst(new_point)
 
         for (point in point_list) {
             if (point.id != new_point.id) {
@@ -228,6 +245,12 @@ class LibGdxDemo : ApplicationAdapter() {
     private lateinit var shaderProgram: ShaderProgram
 
     override fun create() {
+
+        delete_closest = false
+        if ((launcher_mode == LauncherMode.Canvas) or (launcher_mode == LauncherMode.Tesselation)) {
+            delete_closest = true
+        }
+
         val screen_y = Gdx.graphics.getHeight()
         val screen_x = Gdx.graphics.getWidth()
 
@@ -239,14 +262,14 @@ class LibGdxDemo : ApplicationAdapter() {
 
 //        ShaderProgram.pedantic = false
         shaderProgram = ShaderProgram(vertex_shader(), tesselation_shader())
-        if (luancher_mode == LauncherMode.Balls) {
+        if (launcher_mode == LauncherMode.Balls) {
             shaderProgram = ShaderProgram(vertex_shader(), balls_shader())
-        } else if (luancher_mode == LauncherMode.Flames) {
+        } else if (launcher_mode == LauncherMode.Flames) {
             shaderProgram = ShaderProgram(vertex_shader(), light_shader())
         }
 
 
-        if (luancher_mode != LauncherMode.Balls) {
+        if (launcher_mode != LauncherMode.Balls) {
             for (i in 0..point_count - 1) {
                 val new_point = Point(
                     Vector2(MathUtils.random() * screen_x, MathUtils.random() * screen_y),
@@ -254,7 +277,7 @@ class LibGdxDemo : ApplicationAdapter() {
                 )
 
                 controller.nextPointId += 1
-                if (luancher_mode != LauncherMode.Tesselation) {
+                if ((launcher_mode == LauncherMode.Balls) or (launcher_mode == LauncherMode.Flames)) {
                     new_point.color = Color()
                 }
                 controller.point_list.addFirst(new_point)
@@ -349,14 +372,11 @@ class LibGdxDemo : ApplicationAdapter() {
 
         shapeRenderer.begin(ShapeType.Filled);
 
-        for (point in controller.point_list) {
-            point.velocity.scl(0.997f)
-            point.pos.add(point.velocity)
-
-            // shapeRenderer.setColor(point.color.x, point.color.y, point.color.z, 1.0f);
-
-//            shapeRenderer.circle(point.pos.x, screen_y - point.pos.y, 15f);
-
+        if (launcher_mode != LauncherMode.Canvas) {
+            for (point in controller.point_list) {
+                point.velocity.scl(0.997f)
+                point.pos.add(point.velocity)
+            }
         }
 
         shapeRenderer.rect(0f, 0f, screen_x.toFloat(), screen_y.toFloat());

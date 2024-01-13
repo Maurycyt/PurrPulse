@@ -7,23 +7,26 @@ import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration
 import com.iii.purrpulse.gdx_stuff.LibGdxDemo
 
 enum class LauncherMode {
-    None, Balls, Tesselation, Flames,
+    None, Balls, Tesselation, Canvas, Flames,
 }
 
-var luancher_mode = LauncherMode.None
+var launcher_mode = LauncherMode.None
 
 class Launcher : AndroidApplication() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val config = AndroidApplicationConfiguration()
 
-        if (luancher_mode == LauncherMode.Tesselation) {
+        if (launcher_mode == LauncherMode.Tesselation) {
             initialize(LibGdxDemo(), config)
         }
-        else if (luancher_mode == LauncherMode.Flames) {
+        else if (launcher_mode == LauncherMode.Flames) {
             initialize(LibGdxDemo(), config)
         }
-        else if (luancher_mode == LauncherMode.Balls) {
+        else if (launcher_mode == LauncherMode.Balls) {
+            initialize(LibGdxDemo(), config)
+        }
+        else if (launcher_mode == LauncherMode.Canvas) {
             initialize(LibGdxDemo(), config)
         }
     }

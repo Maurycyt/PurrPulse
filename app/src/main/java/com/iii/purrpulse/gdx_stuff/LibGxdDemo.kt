@@ -4,6 +4,7 @@ package com.iii.purrpulse.gdx_stuff
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
@@ -82,7 +83,7 @@ fun getFile(path: String): String {
 }
 class Point(var pos: Vector2, val id: Int) {
     var velocity: Vector2 = Vector2(0f, 0f)
-    var color: Vector3 = Vector3(MathUtils.random(), MathUtils.random(), MathUtils.random())
+    var color: Color = Color().fromHsv(250f + MathUtils.random() * 100f, 1f, 0.35f + MathUtils.random() * 0.5f)
     fun repel(from: Vector2) {
         var direction = pos.cpy().sub(from)
         val distance2 = direction.len2()/1000f + 0.3f
@@ -184,7 +185,7 @@ class LibGdxDemo : ApplicationAdapter() {
         for (i in 0..point_count-1) {
             val new_point = Point(Vector2(screen_x / 2f + i*30, screen_y / 2f + i*30), controller.nextPointId)
             controller.nextPointId += 1
-            new_point.color = Vector3(0f, 0f, 0f)
+            new_point.color = Color()
             controller.point_list.addFirst(new_point)
         }
 
@@ -209,7 +210,7 @@ class LibGdxDemo : ApplicationAdapter() {
         val screen_y = Gdx.graphics.getHeight()
         val screen_x = Gdx.graphics.getWidth()
 
-        Gdx.gl.glClearColor(0.4f, 0.4f, 0.4f, 1f)
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
         shaderProgram.begin();
@@ -218,9 +219,9 @@ class LibGdxDemo : ApplicationAdapter() {
         for (i in 0..point_count - 1) {
             position_array[i*2 + 0] = controller.point_list.get(i).pos.x;
             position_array[i*2 + 1] = screen_y - controller.point_list.get(i).pos.y;
-            color_array[i*3 + 0] = controller.point_list.get(i).color.x;
-            color_array[i*3 + 1] = controller.point_list.get(i).color.y;
-            color_array[i*3 + 2] = controller.point_list.get(i).color.z;
+            color_array[i*3 + 0] = controller.point_list.get(i).color.r;
+            color_array[i*3 + 1] = controller.point_list.get(i).color.g;
+            color_array[i*3 + 2] = controller.point_list.get(i).color.b;
         }
 
         shaderProgram.setUniform2fv("u_positions", position_array, 0, position_array.size)

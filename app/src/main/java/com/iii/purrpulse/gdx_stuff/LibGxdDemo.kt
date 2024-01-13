@@ -15,6 +15,15 @@ import com.badlogic.gdx.math.Vector2
 
 class Point(var pos: Vector2, val id: Int) {
     var velocity: Vector2 = Vector2(0f, 0f)
+
+    fun repel(from: Vector2) {
+        var direction = pos.cpy().sub(from)
+        val distance2 = direction.len2()/1000f + 0.1f
+
+        direction.nor()
+        velocity.add(direction.scl((1f / distance2)))
+    }
+
 }
 
 class MyController : InputProcessor {
@@ -55,7 +64,7 @@ class MyController : InputProcessor {
         touching = true
         point_list.addFirst(Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId))
         nextPointId += 1
-        if (point_list.size > 10) {
+        if (point_list.size > 30) {
             point_list.removeLast()
         }
         return false
@@ -84,7 +93,8 @@ class LibGdxDemo : ApplicationAdapter() {
     var count = 0;
 
     override fun render() {
-        val screen_y =  Gdx.graphics.getHeight()
+        val screen_y = Gdx.graphics.getHeight()
+        val screen_x = Gdx.graphics.getWidth()
 
         Gdx.gl.glClearColor(1f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
@@ -97,21 +107,29 @@ class LibGdxDemo : ApplicationAdapter() {
 //        }
 
         // physics:
-        for (lhs in controller.point_list) {
-            for (rhs in controller.point_list) {
+        for (rhs in controller.point_list) {
+
+            // apply for all points:
+            for (lhs in controller.point_list) {
                 if (lhs.id != rhs.id) {
                     // apply force on rhs:
-                    val direction = rhs.pos.cpy().sub(lhs.pos).nor()
-                    val distance2 = direction.len2() + 0.1f
-
-                    rhs.velocity.add(direction.scl((1f / distance2) / 10f))
-
-
+                    rhs.repel(lhs.pos)
                 }
             }
+
+            // apply from walls:
+            val wall1 = Vector2(rhs.pos.x, 0f)
+            val wall2 = Vector2(rhs.pos.x, screen_y.toFloat())
+            val wall3 = Vector2(screen_x.toFloat(), rhs.pos.y)
+            val wall4 = Vector2(0f, rhs.pos.y)
+            rhs.repel(wall1)
+            rhs.repel(wall2)
+            rhs.repel(wall3)
+            rhs.repel(wall4)
         }
 
         for (point in controller.point_list) {
+            point.velocity.scl(0.997f)
             point.pos.add(point.velocity)
 
             shapeRenderer.setColor(Color.BLACK);
@@ -124,11 +142,11 @@ class LibGdxDemo : ApplicationAdapter() {
 //        font.draw(batch, "Hello", controller.posX, Gdx.graphics.getHeight()-controller.posY)
         batch.end()
 
-        count += 1
-        if (count > 1000) {
-            count = 0
-            Gdx.app.exit()
-        }
+//        count += 1
+//        if (count > 1000) {
+//            count = 0
+//            Gdx.app.exit()
+//        }
     }
 
     override fun dispose() {

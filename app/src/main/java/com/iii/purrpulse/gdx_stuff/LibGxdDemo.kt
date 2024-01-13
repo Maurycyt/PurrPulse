@@ -20,7 +20,7 @@ val point_count: Int = 30
 
 fun fragment_shader() =
     """
-    const int n = 30;
+    const int n = ${point_count};
     
     #ifdef GL_ES
     precision mediump float;
@@ -30,16 +30,18 @@ fun fragment_shader() =
     uniform vec3 u_colors[n];
         
     void main() {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        gl_FragColor = vec4(1.0, 0.0 + u_positions[3][0], 0.0 + u_colors[1][0], 1.0);
     }
     """.trimIndent()
 
 fun vertex_shader() =
     """
+
     attribute vec4 ${ShaderProgram.POSITION_ATTRIBUTE};
     attribute vec4 ${ShaderProgram.COLOR_ATTRIBUTE};
     attribute vec4 ${ShaderProgram.NORMAL_ATTRIBUTE};
     uniform mat4 u_projModelView;
+    
     
     void main() {
         gl_Position =  u_projModelView * ${ShaderProgram.POSITION_ATTRIBUTE};
@@ -130,6 +132,7 @@ class LibGdxDemo : ApplicationAdapter() {
         controller = MyController()
         Gdx.input.inputProcessor = controller
 
+//        ShaderProgram.pedantic = false
         shaderProgram = ShaderProgram(vertex_shader(), fragment_shader())
 
         shapeRenderer = ShapeRenderer(10000, shaderProgram)
@@ -164,10 +167,10 @@ class LibGdxDemo : ApplicationAdapter() {
 
         // set shader input:
 
-        val position_array = FloatArray(point_count )
-        val color_array = FloatArray(point_count )
+        val position_array = FloatArray(point_count * 2);
+        val color_array = FloatArray(point_count * 3)
 
-        shaderProgram.setUniform2fv("u_positions", position_array, 0, point_count * 2)
+        shaderProgram.setUniform2fv("u_positions", position_array, 0, position_array.size)
         shaderProgram.setUniform3fv("u_colors", color_array, 0, point_count * 3)
 
 

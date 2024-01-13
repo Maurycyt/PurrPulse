@@ -18,6 +18,9 @@ import com.badlogic.gdx.math.Vector3
 
 val point_count: Int = 30
 
+var position_array = FloatArray(point_count * 2);
+var color_array = FloatArray(point_count * 3)
+
 fun fragment_shader() =
     """
     const int n = ${point_count};
@@ -28,9 +31,20 @@ fun fragment_shader() =
     
     uniform vec2 u_positions[n];
     uniform vec3 u_colors[n];
+    
+    varying vec2 v_position;
         
     void main() {
-        gl_FragColor = vec4(1.0, 0.0 + u_positions[3][0], 0.0 + u_colors[1][0], 1.0);
+        float min_dist = distance(u_positions[0], v_position);
+        int idx = 0;
+        for (int i = 1; i < n; i++) {
+            float dist = distance(u_positions[i], v_position);
+            if (dist < min_dist) {
+                min_dist = dist;
+                idx = i;
+            }
+        }
+        gl_FragColor = vec4(u_colors[idx], 1.0);
     }
     """.trimIndent()
 
@@ -42,10 +56,13 @@ fun vertex_shader() =
     attribute vec4 ${ShaderProgram.NORMAL_ATTRIBUTE};
     uniform mat4 u_projModelView;
     
+    varying vec2 v_position;   
     
     void main() {
         gl_Position =  u_projModelView * ${ShaderProgram.POSITION_ATTRIBUTE};
+        v_position = a_position.xy;
     }   
+    
      
     """.trimIndent()
 
@@ -74,7 +91,7 @@ class MyController : InputProcessor {
 
     var point_list: ArrayDeque<Point> = ArrayDeque()
     var color_list: ArrayDeque<Vector3> = ArrayDeque()
-    private var nextPointId = 0
+    var nextPointId = 0
     override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         touching = false
         return false
@@ -135,10 +152,28 @@ class LibGdxDemo : ApplicationAdapter() {
 //        ShaderProgram.pedantic = false
         shaderProgram = ShaderProgram(vertex_shader(), fragment_shader())
 
-        shapeRenderer = ShapeRenderer(10000, shaderProgram)
 
-//        getFile("/raw/fragment.glsl")
-//        getFile("vertex.glsl")
+        for (i in 0..point_count-1) {
+            controller.point_list.addFirst(Point(Vector2(i.toFloat()*7, i.toFloat()*7), controller.nextPointId))
+            controller.nextPointId += 1
+        }
+
+        for (i in 0..point_count - 1) {
+            position_array[i*2 + 0] = controller.point_list.get(i).pos.x;
+            position_array[i*2 + 1] = controller.point_list.get(i).pos.y;
+            color_array[i*3 + 0] = controller.point_list.get(i).color.x;
+            color_array[i*3 + 1] = controller.point_list.get(i).color.y;
+            color_array[i*3 + 2] = controller.point_list.get(i).color.z;
+        }
+
+        Gdx.app.log("my_color", "${color_array[3]}");
+        Gdx.app.log("my_color", "${color_array[4]}");
+        Gdx.app.log("my_color", "${color_array[5]}");
+
+        shaderProgram.setUniform2fv("u_positions", position_array, 0, position_array.size)
+        shaderProgram.setUniform3fv("u_colors", color_array, 0, color_array.size)
+
+        shapeRenderer = ShapeRenderer(10000, shaderProgram)
 
 
         Gdx.app.setLogLevel(Application.LOG_DEBUG);
@@ -159,7 +194,7 @@ class LibGdxDemo : ApplicationAdapter() {
         val screen_y = Gdx.graphics.getHeight()
         val screen_x = Gdx.graphics.getWidth()
 
-        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
+        Gdx.gl.glClearColor(1f, 1f, 1f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
         batch.begin()
@@ -167,13 +202,17 @@ class LibGdxDemo : ApplicationAdapter() {
 
         // set shader input:
 
-        val position_array = FloatArray(point_count * 2);
-        val color_array = FloatArray(point_count * 3)
+
+        for (i in 0..point_count - 1) {
+            position_array[i*2 + 0] = controller.point_list.get(i).pos.x;
+            position_array[i*2 + 1] = controller.point_list.get(i).pos.y;
+            color_array[i*3 + 0] = controller.point_list.get(i).color.x;
+            color_array[i*3 + 1] = controller.point_list.get(i).color.y;
+            color_array[i*3 + 2] = controller.point_list.get(i).color.z;
+        }
 
         shaderProgram.setUniform2fv("u_positions", position_array, 0, position_array.size)
-        shaderProgram.setUniform3fv("u_colors", color_array, 0, point_count * 3)
-
-
+        shaderProgram.setUniform3fv("u_colors", color_array, 0, color_array.size)
 
 
         // physics:
@@ -204,7 +243,7 @@ class LibGdxDemo : ApplicationAdapter() {
 
             shapeRenderer.setColor(point.color.x, point.color.y, point.color.z, 1.0f);
             shapeRenderer.begin(ShapeType.Filled);
-            shapeRenderer.circle(point.pos.x, screen_y - point.pos.y, 10f);
+            shapeRenderer.circle(point.pos.x, screen_y - point.pos.y, 15f);
             shapeRenderer.end();
         }
 

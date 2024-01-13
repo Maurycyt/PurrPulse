@@ -28,7 +28,7 @@ fun fragment_shader() =
     #endif
     
     const int n = ${point_count};
-    const float threshold = 1.2;
+    const float threshold = 25.0;
     
     uniform vec2 u_positions[n];
     uniform vec3 u_colors[n];
@@ -44,7 +44,7 @@ fun fragment_shader() =
         float counter = 0.0;
         vec3 total_color = vec3(0.0, 0.0, 0.0);
         for (int i = 0; i < n; i++) {
-            if (distance(u_positions[i], position) < min_dist * threshold) {
+            if (distance(u_positions[i], position) < min_dist + threshold) {
                 total_color += u_colors[i];
                 counter += 1.0;
             }

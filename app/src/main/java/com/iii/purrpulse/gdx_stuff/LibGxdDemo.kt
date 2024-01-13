@@ -244,7 +244,11 @@ class LibGdxDemo : ApplicationAdapter() {
     private lateinit var shapeRenderer: ShapeRenderer
     private lateinit var shaderProgram: ShaderProgram
 
+
+
     override fun create() {
+
+        font = BitmapFont()
 
         delete_closest = false
         if ((launcher_mode == LauncherMode.Canvas) or (launcher_mode == LauncherMode.Tesselation)) {
@@ -370,8 +374,6 @@ class LibGdxDemo : ApplicationAdapter() {
             }
         }
 
-        shapeRenderer.begin(ShapeType.Filled);
-
         if (launcher_mode != LauncherMode.Canvas) {
             for (point in controller.point_list) {
                 point.velocity.scl(0.997f)
@@ -379,13 +381,20 @@ class LibGdxDemo : ApplicationAdapter() {
             }
         }
 
+        shapeRenderer.begin(ShapeType.Filled);
         shapeRenderer.rect(0f, 0f, screen_x.toFloat(), screen_y.toFloat());
-
-
         shapeRenderer.end();
-        batch.end()
         shaderProgram.end()
 
+        batch.end()
+
+        if ((controller.point_list.size == 0)) {
+            batch.begin()
+            font.setColor(1f, 1f, 1f, 0.5f)
+            font.draw(batch, "Click to start!", screen_x/2f - 280, screen_y/2f)
+            font.data.setScale(7f)
+            batch.end()
+        }
     }
 
     override fun dispose() {

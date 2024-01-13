@@ -4,8 +4,8 @@ package com.iii.purrpulse.gdx_stuff
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.InputProcessor
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -16,10 +16,11 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.iii.purrpulse.LauncherMode
+import com.iii.purrpulse.launcher_mode
 import kotlin.math.max
 import kotlin.math.min
-import com.iii.purrpulse.launcher_mode
-import com.iii.purrpulse.LauncherMode
+
 
 val point_count: Int = 50
 
@@ -280,7 +281,9 @@ class LibGdxDemo : ApplicationAdapter() {
         val screen_x = Gdx.graphics.getWidth()
 
         batch = SpriteBatch()
+
         font = BitmapFont()
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
         controller = MyController()
         Gdx.input.inputProcessor = controller

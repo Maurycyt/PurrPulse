@@ -29,6 +29,13 @@ var color_array = FloatArray(point_count * 3)
 val use_highp = false
 var delete_closest = false
 
+var central_hue_setting = 300f
+var hue_spread_setting = 100f
+
+var central_hue = 300f
+var hue_spread = 100f
+
+
 fun light_shader() =
     """
     #ifdef GL_ES
@@ -143,7 +150,7 @@ fun getFile(path: String): String {
 }
 class Point(var pos: Vector2, val id: Int) {
     var velocity: Vector2 = Vector2(0f, 0f)
-    var color: Color = Color().fromHsv(250f + MathUtils.random() * 100f, 1f, 0.35f + MathUtils.random() * 0.5f)
+    var color: Color = Color().fromHsv((central_hue + (MathUtils.random() - 0.5f) * hue_spread).mod(360f), 1f, 0.35f + MathUtils.random() * 0.5f)
     fun repel(from: Vector2) {
         var direction = pos.cpy().sub(from)
         val distance2 = direction.len2()/1000f + 0.3f
@@ -247,8 +254,17 @@ class LibGdxDemo : ApplicationAdapter() {
     override fun create() {
 
         delete_closest = false
-        if ((launcher_mode == LauncherMode.Canvas) or (launcher_mode == LauncherMode.Tesselation)) {
+        if ((launcher_mode == LauncherMode.Canvas) or (launcher_mode == LauncherMode.Tesselation) or (launcher_mode == LauncherMode.Flames)) {
             delete_closest = true
+        }
+
+        if (launcher_mode == LauncherMode.Canvas) {
+            central_hue = 0f
+            hue_spread = 360f
+        }
+        else {
+            central_hue = central_hue_setting
+            hue_spread = hue_spread_setting
         }
 
         val screen_y = Gdx.graphics.getHeight()

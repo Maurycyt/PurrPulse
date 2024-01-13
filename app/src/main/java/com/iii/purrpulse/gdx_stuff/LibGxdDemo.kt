@@ -18,6 +18,8 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import kotlin.math.max
 import kotlin.math.min
+import com.iii.purrpulse.luancher_mode
+import com.iii.purrpulse.LauncherMode
 
 val point_count: Int = 50
 
@@ -236,14 +238,27 @@ class LibGdxDemo : ApplicationAdapter() {
         Gdx.input.inputProcessor = controller
 
 //        ShaderProgram.pedantic = false
-        shaderProgram = ShaderProgram(vertex_shader(), balls_shader())
+        shaderProgram = ShaderProgram(vertex_shader(), tesselation_shader())
+        if (luancher_mode == LauncherMode.Balls) {
+            shaderProgram = ShaderProgram(vertex_shader(), balls_shader())
+        } else if (luancher_mode == LauncherMode.Flames) {
+            shaderProgram = ShaderProgram(vertex_shader(), light_shader())
+        }
 
 
-        for (i in 0..point_count-1) {
-            val new_point = Point(Vector2(screen_x / 2f + i*30, screen_y / 2f + i*30), controller.nextPointId)
-            controller.nextPointId += 1
-            new_point.color = Color()
-            controller.point_list.addFirst(new_point)
+        if (luancher_mode != LauncherMode.Balls) {
+            for (i in 0..point_count - 1) {
+                val new_point = Point(
+                    Vector2(MathUtils.random() * screen_x, MathUtils.random() * screen_y),
+                    controller.nextPointId
+                )
+
+                controller.nextPointId += 1
+                if (luancher_mode != LauncherMode.Tesselation) {
+                    new_point.color = Color()
+                }
+                controller.point_list.addFirst(new_point)
+            }
         }
 
         shapeRenderer = ShapeRenderer(5000, shaderProgram)
@@ -273,7 +288,14 @@ class LibGdxDemo : ApplicationAdapter() {
         shaderProgram.begin();
 
         // set shader input:
-        for (i in 0..point_count - 1) {
+        for (i in 0..point_count-1) {
+            position_array[i*2 + 0] = -7000f;
+            position_array[i*2 + 1] = -7000f;
+            color_array[i*3 + 0] = 0f;
+            color_array[i*3 + 1] = 0f;
+            color_array[i*3 + 2] = 0f;
+        }
+        for (i in 0..controller.point_list.size-1) {
             position_array[i*2 + 0] = controller.point_list.get(i).pos.x;
             position_array[i*2 + 1] = screen_y - controller.point_list.get(i).pos.y;
             color_array[i*3 + 0] = controller.point_list.get(i).color.r;

@@ -29,6 +29,15 @@ var color_array = FloatArray(point_count * 3)
 val use_highp = false
 var delete_closest = false
 
+
+var central_hue_setting = 300f
+var hue_spread_setting = 100f
+
+var central_hue = 300f
+var hue_spread = 100f
+
+var clicked = false
+
 fun light_shader() =
     """
     #ifdef GL_ES
@@ -143,7 +152,7 @@ fun getFile(path: String): String {
 }
 class Point(var pos: Vector2, val id: Int) {
     var velocity: Vector2 = Vector2(0f, 0f)
-    var color: Color = Color().fromHsv(250f + MathUtils.random() * 100f, 1f, 0.35f + MathUtils.random() * 0.5f)
+    var color: Color = Color().fromHsv((central_hue + (MathUtils.random() - 0.5f) * hue_spread).mod(360f), 1f, 0.35f + MathUtils.random() * 0.5f)
     fun repel(from: Vector2) {
         var direction = pos.cpy().sub(from)
         val distance2 = direction.len2()/1000f + 0.3f
@@ -197,6 +206,8 @@ class MyController : InputProcessor {
     }
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+
+        clicked = true
         touching = true
         val new_point = Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId)
         new_point.velocity = Vector2(MathUtils.random()*5, MathUtils.random()*5)
@@ -244,11 +255,25 @@ class LibGdxDemo : ApplicationAdapter() {
     private lateinit var shapeRenderer: ShapeRenderer
     private lateinit var shaderProgram: ShaderProgram
 
+
+
     override fun create() {
+        clicked = false
+
+        font = BitmapFont()
 
         delete_closest = false
-        if ((launcher_mode == LauncherMode.Canvas) or (launcher_mode == LauncherMode.Tesselation)) {
+        if ((launcher_mode == LauncherMode.Canvas) or (launcher_mode == LauncherMode.Tesselation) or (launcher_mode == LauncherMode.Flames)) {
             delete_closest = true
+        }
+
+        if (launcher_mode == LauncherMode.Canvas) {
+            central_hue = 0f
+            hue_spread = 360f
+        }
+        else {
+            central_hue = central_hue_setting
+            hue_spread = hue_spread_setting
         }
 
         val screen_y = Gdx.graphics.getHeight()
@@ -370,8 +395,6 @@ class LibGdxDemo : ApplicationAdapter() {
             }
         }
 
-        shapeRenderer.begin(ShapeType.Filled);
-
         if (launcher_mode != LauncherMode.Canvas) {
             for (point in controller.point_list) {
                 point.velocity.scl(0.997f)
@@ -379,13 +402,20 @@ class LibGdxDemo : ApplicationAdapter() {
             }
         }
 
+        shapeRenderer.begin(ShapeType.Filled);
         shapeRenderer.rect(0f, 0f, screen_x.toFloat(), screen_y.toFloat());
-
-
         shapeRenderer.end();
-        batch.end()
         shaderProgram.end()
 
+        batch.end()
+
+        if (!clicked) {
+            batch.begin()
+            font.setColor(1f, 1f, 1f, 0.5f)
+            font.draw(batch, "Click to start!", screen_x/2f - 280, screen_y/2f)
+            font.data.setScale(7f)
+            batch.end()
+        }
     }
 
     override fun dispose() {

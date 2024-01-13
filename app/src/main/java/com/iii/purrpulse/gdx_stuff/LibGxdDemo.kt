@@ -16,7 +16,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 
-val point_count: Int = 70
+val point_count: Int = 50
 
 var position_array = FloatArray(point_count * 2);
 var color_array = FloatArray(point_count * 3)
@@ -38,7 +38,7 @@ fun fragment_shader() =
         vec3 final_color = vec3(0.1, 0.1, 0.1);
         for (int i = 0; i < n; i++) {
             float dist = distance(u_positions[i], position);
-            total_dist += (1.0 / (1.0 + dist * dist * dist * dist));
+            total_dist += (1.0 / (1.0 + dist * dist * dist * dist ));
         }
         total_dist *= 1.25;
         for (int i = 0; i < n; i++) {

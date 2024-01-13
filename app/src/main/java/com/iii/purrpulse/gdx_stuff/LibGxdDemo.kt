@@ -34,14 +34,15 @@ fun fragment_shader() =
             
     void main() {
         vec2 position = gl_FragCoord.xy;
-        float min_dist = distance(u_positions[0], position);
-        vec3 final_color = u_colors[0];
-        for (int i = 1; i < n; i++) {
-            float dist = distance(u_positions[i], position);
-            if (dist < min_dist) {
-                min_dist = dist;
-                final_color = u_colors[i];
-            }
+        float total_dist = 0.0f;
+        vec3 final_color = vec3(0.1f, 0.1f, 0.1f);
+        for (int i = 0; i < n; i++) {
+            total_dist += 1.0f / (1.0f + distance(u_positions[i], position));
+        }
+        total_dist *= 1.25;
+        for (int i = 0; i < n; i++) {
+            float dist = 1.0f / (1.0f + distance(u_positions[i], position));
+            final_color += u_colors[i] * (dist/total_dist);
         }
         gl_FragColor = vec4(final_color, 1.0);
     }

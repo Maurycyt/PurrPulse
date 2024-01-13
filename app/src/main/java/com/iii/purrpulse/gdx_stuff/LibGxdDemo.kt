@@ -11,10 +11,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
-<<<<<<< HEAD
-=======
-import com.badlogic.gdx.graphics.Color
->>>>>>> 632adf74bdab241d4161d08488d32c29e1ef4f1f
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.math.MathUtils

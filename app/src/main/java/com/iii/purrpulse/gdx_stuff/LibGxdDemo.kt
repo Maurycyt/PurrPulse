@@ -26,7 +26,7 @@ var color_array = FloatArray(point_count * 3)
 
 val use_highp = false
 
-fun fragment_shader() =
+fun light_shader() =
     """
     #ifdef GL_ES
     precision ${if (use_highp) "highp" else "mediump"} float;
@@ -61,6 +61,61 @@ fun fragment_shader() =
     }
     """.trimIndent()
 
+fun tesselation_shader() =
+    """
+    #ifdef GL_ES
+    precision ${if (use_highp) "highp" else "mediump"} float;
+    #endif
+    
+    const int n = ${point_count};
+    
+    uniform vec2 u_positions[n];
+    uniform vec3 u_colors[n];
+            
+        void main() {
+        vec2 position = gl_FragCoord.xy;
+        float min_dist = distance(u_positions[0], position);
+        vec3 final_color = u_colors[0];
+        for (int i = 1; i < n; i++) {
+            float dist = distance(u_positions[i], position);
+            if (dist < min_dist) {
+                min_dist = dist;
+                final_color = u_colors[i];
+            }
+        }
+        gl_FragColor = vec4(final_color, 1.0);
+    }
+    """.trimIndent()
+
+fun balls_shader() =
+    """
+    #ifdef GL_ES
+    precision ${if (use_highp) "highp" else "mediump"} float;
+    #endif
+    
+    const int n = ${point_count};
+    
+    uniform vec2 u_positions[n];
+    uniform vec3 u_colors[n];
+            
+        void main() {
+        vec2 position = gl_FragCoord.xy;
+        float min_dist = distance(u_positions[0], position);
+        vec3 final_color = u_colors[0];
+        for (int i = 1; i < n; i++) {
+            float dist = distance(u_positions[i], position);
+            if (dist < min_dist) {
+                min_dist = dist;
+                final_color = u_colors[i];
+            }
+        }
+        if (min_dist > 150.0) {
+            final_color = vec3(0.0, 0.0, 0.0);
+        }
+        gl_FragColor = vec4(final_color, 1.0);
+    }
+    """.trimIndent()
+
 fun vertex_shader() =
     """
 
@@ -71,7 +126,7 @@ fun vertex_shader() =
     uniform mat4 u_projModelView;
 
     void main() {
-        gl_Position =  u_projModelView * ${ShaderProgram.POSITION_ATTRIBUTE};
+        gl_Position = u_projModelView * ${ShaderProgram.POSITION_ATTRIBUTE};
     }   
      
     """.trimIndent()
@@ -181,7 +236,7 @@ class LibGdxDemo : ApplicationAdapter() {
         Gdx.input.inputProcessor = controller
 
 //        ShaderProgram.pedantic = false
-        shaderProgram = ShaderProgram(vertex_shader(), fragment_shader())
+        shaderProgram = ShaderProgram(vertex_shader(), balls_shader())
 
 
         for (i in 0..point_count-1) {

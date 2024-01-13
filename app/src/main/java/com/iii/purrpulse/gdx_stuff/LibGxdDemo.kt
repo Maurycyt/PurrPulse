@@ -36,7 +36,7 @@ var hue_spread_setting = 100f
 var central_hue = 300f
 var hue_spread = 100f
 
-
+var clicked = false
 
 fun light_shader() =
     """
@@ -206,6 +206,8 @@ class MyController : InputProcessor {
     }
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+
+        clicked = true
         touching = true
         val new_point = Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId)
         new_point.velocity = Vector2(MathUtils.random()*5, MathUtils.random()*5)
@@ -256,6 +258,7 @@ class LibGdxDemo : ApplicationAdapter() {
 
 
     override fun create() {
+        clicked = false
 
         font = BitmapFont()
 
@@ -406,7 +409,7 @@ class LibGdxDemo : ApplicationAdapter() {
 
         batch.end()
 
-        if ((controller.point_list.size == 0)) {
+        if (!clicked) {
             batch.begin()
             font.setColor(1f, 1f, 1f, 0.5f)
             font.draw(batch, "Click to start!", screen_x/2f - 280, screen_y/2f)

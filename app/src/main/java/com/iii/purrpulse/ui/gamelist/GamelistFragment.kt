@@ -9,6 +9,8 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.iii.purrpulse.Launcher
+import com.iii.purrpulse.launcher_mode
+import com.iii.purrpulse.LauncherMode
 import com.iii.purrpulse.databinding.FragmentGamelistBinding
 
 
@@ -19,13 +21,35 @@ class GamelistFragment : Fragment() {
 
         private var gamesList : Array<GameListing> = arrayOf()
 
-        private val easyGames = arrayOf(GameListing("SAMPLE", ::launchlibGDX), GameListing(), GameListing())
+        private val easyGames = arrayOf(
+            GameListing("Balls", ::launchlibBalls),
+            GameListing("Tessellation", ::launchlibTesselation),
+            GameListing("Light", ::launchlibFlames),
+            GameListing("Canvas", ::launchlibCanvas),
+        )
 
         private val midGames = arrayOf(GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing())
 
         private val hardGames = arrayOf(GameListing(), GameListing())
 
-        fun launchlibGDX(v : View) {
+        fun launchlibBalls(v : View) {
+            launcher_mode = LauncherMode.Balls
+            val intent = Intent(v.context, Launcher::class.java)
+            v.context.startActivity(intent)
+        }
+        fun launchlibTesselation(v : View) {
+            launcher_mode = LauncherMode.Tesselation
+            val intent = Intent(v.context, Launcher::class.java)
+            v.context.startActivity(intent)
+        }
+
+        fun launchlibCanvas(v : View) {
+            launcher_mode = LauncherMode.Canvas
+            val intent = Intent(v.context, Launcher::class.java)
+            v.context.startActivity(intent)
+        }
+        fun launchlibFlames(v : View) {
+            launcher_mode = LauncherMode.Flames
             val intent = Intent(v.context, Launcher::class.java)
             v.context.startActivity(intent)
         }

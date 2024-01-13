@@ -4,6 +4,7 @@ package com.iii.purrpulse.gdx_stuff
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
@@ -15,16 +16,58 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import kotlin.math.max
+import kotlin.math.min
+import com.iii.purrpulse.launcher_mode
+import com.iii.purrpulse.LauncherMode
 
 val point_count: Int = 50
 
 var position_array = FloatArray(point_count * 2);
 var color_array = FloatArray(point_count * 3)
 
-fun fragment_shader() =
+val use_highp = false
+var delete_closest = false
+
+fun light_shader() =
     """
     #ifdef GL_ES
-    precision highp float;
+    precision ${if (use_highp) "highp" else "mediump"} float;
+    #endif
+    
+    const int n = ${point_count};
+    const float threshold = 25.0;
+    
+    uniform vec2 u_positions[n];
+    uniform vec3 u_colors[n];
+            
+    void main() {
+        vec2 position = gl_FragCoord.xy;
+        float min_dist = distance(u_positions[0], position);
+        for (int i = 1; i < n; i++) {
+            if (distance(u_positions[i], position) < min_dist) {
+                min_dist = distance(u_positions[i], position);
+            }
+        }
+        float counter = 0.0;
+        vec3 total_color = vec3(0.0, 0.0, 0.0);
+        for (int i = 0; i < n; i++) {
+            float border = min_dist + threshold;
+            float dist = distance(u_positions[i], position); 
+            if (dist < border) {
+                total_color += u_colors[i] * (border - dist);
+                counter += border - dist;
+            }
+        }
+        vec3 final_color = vec3(total_color.x/counter, total_color.y/counter, total_color.z/counter);
+        gl_FragColor = vec4(final_color, 1.0);
+    }
+    """.trimIndent()
+
+fun tesselation_shader() =
+    """
+    #ifdef GL_ES
+    precision ${if (use_highp) "highp" else "mediump"} float;
     #endif
     
     const int n = ${point_count};
@@ -32,18 +75,45 @@ fun fragment_shader() =
     uniform vec2 u_positions[n];
     uniform vec3 u_colors[n];
             
-    void main() {
+        void main() {
         vec2 position = gl_FragCoord.xy;
-        float total_dist = 0.0;
-        vec3 final_color = vec3(0.1, 0.1, 0.1);
-        for (int i = 0; i < n; i++) {
+        float min_dist = distance(u_positions[0], position);
+        vec3 final_color = u_colors[0];
+        for (int i = 1; i < n; i++) {
             float dist = distance(u_positions[i], position);
-            total_dist += (1.0 / (1.0 + dist * dist * dist * dist ));
+            if (dist < min_dist) {
+                min_dist = dist;
+                final_color = u_colors[i];
+            }
         }
-        total_dist *= 1.25;
-        for (int i = 0; i < n; i++) {
+        gl_FragColor = vec4(final_color, 1.0);
+    }
+    """.trimIndent()
+
+fun balls_shader() =
+    """
+    #ifdef GL_ES
+    precision ${if (use_highp) "highp" else "mediump"} float;
+    #endif
+    
+    const int n = ${point_count};
+    
+    uniform vec2 u_positions[n];
+    uniform vec3 u_colors[n];
+            
+        void main() {
+        vec2 position = gl_FragCoord.xy;
+        float min_dist = distance(u_positions[0], position);
+        vec3 final_color = u_colors[0];
+        for (int i = 1; i < n; i++) {
             float dist = distance(u_positions[i], position);
-            final_color += u_colors[i] * ((1.0 / (1.0 + dist * dist * dist * dist))/total_dist);
+            if (dist < min_dist) {
+                min_dist = dist;
+                final_color = u_colors[i];
+            }
+        }
+        if (min_dist > 150.0) {
+            final_color = vec3(0.0, 0.0, 0.0);
         }
         gl_FragColor = vec4(final_color, 1.0);
     }
@@ -59,7 +129,7 @@ fun vertex_shader() =
     uniform mat4 u_projModelView;
 
     void main() {
-        gl_Position =  u_projModelView * ${ShaderProgram.POSITION_ATTRIBUTE};
+        gl_Position = u_projModelView * ${ShaderProgram.POSITION_ATTRIBUTE};
     }   
      
     """.trimIndent()
@@ -73,13 +143,20 @@ fun getFile(path: String): String {
 }
 class Point(var pos: Vector2, val id: Int) {
     var velocity: Vector2 = Vector2(0f, 0f)
-    var color: Vector3 = Vector3(MathUtils.random(), MathUtils.random(), MathUtils.random())
+    var color: Color = Color().fromHsv(250f + MathUtils.random() * 100f, 1f, 0.35f + MathUtils.random() * 0.5f)
     fun repel(from: Vector2) {
         var direction = pos.cpy().sub(from)
-        val distance2 = direction.len2()/1000f + 0.1f
+        val distance2 = direction.len2()/1000f + 0.3f
 
         direction.nor()
         velocity.add(direction.scl((1f / distance2)))
+    }
+
+    fun repelSpawn(from: Vector2) {
+        var direction = pos.cpy().sub(from)
+//        val distance2 = direction.len() + 10f
+        direction.nor()
+        velocity.add(direction.scl(10f));
     }
 
 }
@@ -121,11 +198,38 @@ class MyController : InputProcessor {
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         touching = true
-        point_list.addFirst(Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId))
+        val new_point = Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId)
+        new_point.velocity = Vector2(MathUtils.random()*5, MathUtils.random()*5)
         nextPointId += 1
-        if (point_list.size > point_count) {
-            point_list.removeLast()
+
+        if (point_list.size > point_count - 1) {
+            if (delete_closest) {
+                var candidate = point_list.get(0)
+                var min_dist = new_point.pos.cpy().sub(candidate.pos).len2()
+                for (point in point_list) {
+                    var point_dist = new_point.pos.cpy().sub(point.pos).len2()
+                    if (point_dist < min_dist) {
+                        min_dist = point_dist
+                        candidate = point
+                    }
+                }
+                point_list.remove(candidate)
+            }
+            else {
+                point_list.removeLast()
+            }
         }
+
+        point_list.addFirst(new_point)
+
+        for (point in point_list) {
+            if (point.id != new_point.id) {
+                // apply force on rhs:
+                point.repelSpawn(new_point.pos)
+            }
+        }
+
+
         return false
     }
 }
@@ -141,6 +245,15 @@ class LibGdxDemo : ApplicationAdapter() {
     private lateinit var shaderProgram: ShaderProgram
 
     override fun create() {
+
+        delete_closest = false
+        if ((launcher_mode == LauncherMode.Canvas) or (launcher_mode == LauncherMode.Tesselation)) {
+            delete_closest = true
+        }
+
+        val screen_y = Gdx.graphics.getHeight()
+        val screen_x = Gdx.graphics.getWidth()
+
         batch = SpriteBatch()
         font = BitmapFont()
 
@@ -148,12 +261,27 @@ class LibGdxDemo : ApplicationAdapter() {
         Gdx.input.inputProcessor = controller
 
 //        ShaderProgram.pedantic = false
-        shaderProgram = ShaderProgram(vertex_shader(), fragment_shader())
+        shaderProgram = ShaderProgram(vertex_shader(), tesselation_shader())
+        if (launcher_mode == LauncherMode.Balls) {
+            shaderProgram = ShaderProgram(vertex_shader(), balls_shader())
+        } else if (launcher_mode == LauncherMode.Flames) {
+            shaderProgram = ShaderProgram(vertex_shader(), light_shader())
+        }
 
 
-        for (i in 0..point_count-1) {
-            controller.point_list.addFirst(Point(Vector2(i.toFloat()*7, i.toFloat()*7), controller.nextPointId))
-            controller.nextPointId += 1
+        if (launcher_mode != LauncherMode.Balls) {
+            for (i in 0..point_count - 1) {
+                val new_point = Point(
+                    Vector2(MathUtils.random() * screen_x, MathUtils.random() * screen_y),
+                    controller.nextPointId
+                )
+
+                controller.nextPointId += 1
+                if ((launcher_mode == LauncherMode.Balls) or (launcher_mode == LauncherMode.Flames)) {
+                    new_point.color = Color()
+                }
+                controller.point_list.addFirst(new_point)
+            }
         }
 
         shapeRenderer = ShapeRenderer(5000, shaderProgram)
@@ -177,18 +305,25 @@ class LibGdxDemo : ApplicationAdapter() {
         val screen_y = Gdx.graphics.getHeight()
         val screen_x = Gdx.graphics.getWidth()
 
-        Gdx.gl.glClearColor(0.4f, 0.4f, 0.4f, 1f)
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
         shaderProgram.begin();
 
         // set shader input:
-        for (i in 0..point_count - 1) {
+        for (i in 0..point_count-1) {
+            position_array[i*2 + 0] = -7000f;
+            position_array[i*2 + 1] = -7000f;
+            color_array[i*3 + 0] = 0f;
+            color_array[i*3 + 1] = 0f;
+            color_array[i*3 + 2] = 0f;
+        }
+        for (i in 0..controller.point_list.size-1) {
             position_array[i*2 + 0] = controller.point_list.get(i).pos.x;
             position_array[i*2 + 1] = screen_y - controller.point_list.get(i).pos.y;
-            color_array[i*3 + 0] = controller.point_list.get(i).color.x;
-            color_array[i*3 + 1] = controller.point_list.get(i).color.y;
-            color_array[i*3 + 2] = controller.point_list.get(i).color.z;
+            color_array[i*3 + 0] = controller.point_list.get(i).color.r;
+            color_array[i*3 + 1] = controller.point_list.get(i).color.g;
+            color_array[i*3 + 2] = controller.point_list.get(i).color.b;
         }
 
         shaderProgram.setUniform2fv("u_positions", position_array, 0, position_array.size)
@@ -216,18 +351,32 @@ class LibGdxDemo : ApplicationAdapter() {
             rhs.repel(wall2)
             rhs.repel(wall3)
             rhs.repel(wall4)
+
+            if (rhs.pos.x < 0) {
+                rhs.pos.x = 0.1f;
+                rhs.velocity.x = max(rhs.velocity.x, 0f)
+            }
+            if (rhs.pos.y < 0) {
+                rhs.pos.y = 0.1f;
+                rhs.velocity.y = max(rhs.velocity.y, 0f)
+            }
+            if (rhs.pos.x > screen_x) {
+                rhs.pos.x = screen_x - 0.1f;
+                rhs.velocity.x = min(rhs.velocity.x, 0f)
+            }
+            if (rhs.pos.y > screen_y) {
+                rhs.pos.y = screen_y - 0.1f;
+                rhs.velocity.y = min(rhs.velocity.y, 0f)
+            }
         }
 
         shapeRenderer.begin(ShapeType.Filled);
 
-        for (point in controller.point_list) {
-            point.velocity.scl(0.997f)
-            point.pos.add(point.velocity)
-
-            // shapeRenderer.setColor(point.color.x, point.color.y, point.color.z, 1.0f);
-
-//            shapeRenderer.circle(point.pos.x, screen_y - point.pos.y, 15f);
-
+        if (launcher_mode != LauncherMode.Canvas) {
+            for (point in controller.point_list) {
+                point.velocity.scl(0.997f)
+                point.pos.add(point.velocity)
+            }
         }
 
         shapeRenderer.rect(0f, 0f, screen_x.toFloat(), screen_y.toFloat());

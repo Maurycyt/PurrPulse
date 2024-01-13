@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.iii.purrpulse.databinding.FragmentGamelistBinding
 
@@ -14,14 +15,23 @@ class GamelistFragment : Fragment() {
     private var _binding: FragmentGamelistBinding? = null
 
     companion object {
+        private var title : String = ""
+
         private var gamesList : Array<String> = arrayOf()
 
         fun setEasyGames() {
-            gamesList = arrayOf("Easy game 1", "Easy game 2")
+            title = "Mindless games"
+            gamesList = arrayOf("Mindless game 1", "Mindless game 2")
+        }
+
+        fun setMidGames() {
+            title = "Semi mindful games"
+            gamesList = arrayOf("Mid game 1", "Mid game 2")
         }
 
         fun setHardGames() {
-            gamesList = arrayOf("Hard game 1", "Hard game 2", "Hard game 3")
+            title = "Mindful games"
+            gamesList = arrayOf("Mindful game 1", "Mindful game 2", "Mindful game 3")
         }
     }
 
@@ -38,6 +48,9 @@ class GamelistFragment : Fragment() {
 
         _binding = FragmentGamelistBinding.inflate(inflater, container, false)
         val root: View = binding.root
+
+        val actionBar = (activity as? AppCompatActivity)?.supportActionBar
+        actionBar?.setTitle(title)
 
         val ll = binding.gamesList
 

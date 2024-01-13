@@ -5,7 +5,8 @@
     <string name="title_settings">Settings</string>
     <string name="title_gamelist">Game List</string>
     <string name="launch_libgdx">YOOOO</string>
-    <string name="game_selection_1">Game Selection 1</string>
-    <string name="game_selection_2">Game Selection 2</string>
+    <string name="game_selection_1">Mindless</string>
+    <string name="game_selection_2">Semi-Mindful</string>
+    <string name="game_selection_3">Mindful</string>
 
 </resources>

@@ -46,6 +46,11 @@ class HomeFragment : Fragment() {
             view.findNavController().navigate(R.id.action_home_to_gamelist)
         }
 
+        view.findViewById<Button>(R.id.mid_games).setOnClickListener {
+            GamelistFragment.setMidGames()
+            view.findNavController().navigate(R.id.action_home_to_gamelist)
+        }
+
         view.findViewById<Button>(R.id.hard_games).setOnClickListener {
             GamelistFragment.setHardGames()
             view.findNavController().navigate(R.id.action_home_to_gamelist)

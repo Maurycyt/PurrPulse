@@ -44,9 +44,11 @@ fun fragment_shader() =
         float counter = 0.0;
         vec3 total_color = vec3(0.0, 0.0, 0.0);
         for (int i = 0; i < n; i++) {
-            if (distance(u_positions[i], position) < min_dist + threshold) {
-                total_color += u_colors[i];
-                counter += 1.0;
+            float border = min_dist + threshold;
+            float dist = distance(u_positions[i], position); 
+            if (dist < border) {
+                total_color += u_colors[i] * (border - dist);
+                counter += border - dist;
             }
         }
         vec3 final_color = vec3(total_color.x/counter, total_color.y/counter, total_color.z/counter);

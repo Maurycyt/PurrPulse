@@ -229,9 +229,12 @@ class LibGdxDemo : ApplicationAdapter() {
 
             // shapeRenderer.setColor(point.color.x, point.color.y, point.color.z, 1.0f);
 
-            shapeRenderer.circle(point.pos.x, screen_y - point.pos.y, 15f);
+//            shapeRenderer.circle(point.pos.x, screen_y - point.pos.y, 15f);
 
         }
+
+        shapeRenderer.rect(0f, 0f, screen_x.toFloat(), screen_y.toFloat());
+
 
         shapeRenderer.end();
         batch.end()

@@ -23,28 +23,28 @@ var color_array = FloatArray(point_count * 3)
 
 fun fragment_shader() =
     """
-    const int n = ${point_count};
-    
     #ifdef GL_ES
     precision mediump float;
     #endif
+    
+    const int n = ${point_count};
     
     uniform vec2 u_positions[n];
     uniform vec3 u_colors[n];
     
     varying vec2 v_position;
-        
+            
     void main() {
         float min_dist = distance(u_positions[0], v_position);
-        int idx = 0;
+        vec3 final_color = u_colors[0];
         for (int i = 1; i < n; i++) {
             float dist = distance(u_positions[i], v_position);
             if (dist < min_dist) {
                 min_dist = dist;
-                idx = i;
+                final_color = u_colors[i];
             }
         }
-        gl_FragColor = vec4(u_colors[idx], 1.0);
+        gl_FragColor = vec4(final_color, 1.0);
     }
     """.trimIndent()
 
@@ -54,15 +54,15 @@ fun vertex_shader() =
     attribute vec4 ${ShaderProgram.POSITION_ATTRIBUTE};
     attribute vec4 ${ShaderProgram.COLOR_ATTRIBUTE};
     attribute vec4 ${ShaderProgram.NORMAL_ATTRIBUTE};
+    
     uniform mat4 u_projModelView;
     
     varying vec2 v_position;   
-    
+
     void main() {
-        gl_Position =  u_projModelView * ${ShaderProgram.POSITION_ATTRIBUTE};
         v_position = a_position.xy;
+        gl_Position =  u_projModelView * ${ShaderProgram.POSITION_ATTRIBUTE};
     }   
-    
      
     """.trimIndent()
 
@@ -158,22 +158,7 @@ class LibGdxDemo : ApplicationAdapter() {
             controller.nextPointId += 1
         }
 
-        for (i in 0..point_count - 1) {
-            position_array[i*2 + 0] = controller.point_list.get(i).pos.x;
-            position_array[i*2 + 1] = controller.point_list.get(i).pos.y;
-            color_array[i*3 + 0] = controller.point_list.get(i).color.x;
-            color_array[i*3 + 1] = controller.point_list.get(i).color.y;
-            color_array[i*3 + 2] = controller.point_list.get(i).color.z;
-        }
-
-        Gdx.app.log("my_color", "${color_array[3]}");
-        Gdx.app.log("my_color", "${color_array[4]}");
-        Gdx.app.log("my_color", "${color_array[5]}");
-
-        shaderProgram.setUniform2fv("u_positions", position_array, 0, position_array.size)
-        shaderProgram.setUniform3fv("u_colors", color_array, 0, color_array.size)
-
-        shapeRenderer = ShapeRenderer(10000, shaderProgram)
+        shapeRenderer = ShapeRenderer(5000, shaderProgram)
 
 
         Gdx.app.setLogLevel(Application.LOG_DEBUG);
@@ -194,15 +179,12 @@ class LibGdxDemo : ApplicationAdapter() {
         val screen_y = Gdx.graphics.getHeight()
         val screen_x = Gdx.graphics.getWidth()
 
-        Gdx.gl.glClearColor(1f, 1f, 1f, 1f)
+        Gdx.gl.glClearColor(0.4f, 0.4f, 0.4f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
-        batch.begin()
-//        batch.setShader(shaderProgram)
+        shaderProgram.begin();
 
         // set shader input:
-
-
         for (i in 0..point_count - 1) {
             position_array[i*2 + 0] = controller.point_list.get(i).pos.x;
             position_array[i*2 + 1] = controller.point_list.get(i).pos.y;
@@ -213,7 +195,9 @@ class LibGdxDemo : ApplicationAdapter() {
 
         shaderProgram.setUniform2fv("u_positions", position_array, 0, position_array.size)
         shaderProgram.setUniform3fv("u_colors", color_array, 0, color_array.size)
+//        shaderProgram.setUniformf("white", 0.9f);
 
+        batch.begin()
 
         // physics:
         for (rhs in controller.point_list) {
@@ -237,17 +221,21 @@ class LibGdxDemo : ApplicationAdapter() {
             rhs.repel(wall4)
         }
 
+        shapeRenderer.begin(ShapeType.Filled);
+
         for (point in controller.point_list) {
             point.velocity.scl(0.997f)
             point.pos.add(point.velocity)
 
-            shapeRenderer.setColor(point.color.x, point.color.y, point.color.z, 1.0f);
-            shapeRenderer.begin(ShapeType.Filled);
+            // shapeRenderer.setColor(point.color.x, point.color.y, point.color.z, 1.0f);
+
             shapeRenderer.circle(point.pos.x, screen_y - point.pos.y, 15f);
-            shapeRenderer.end();
+
         }
 
+        shapeRenderer.end();
         batch.end()
+        shaderProgram.end()
 
     }
 

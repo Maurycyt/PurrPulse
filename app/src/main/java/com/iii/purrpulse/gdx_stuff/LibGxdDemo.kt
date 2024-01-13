@@ -15,6 +15,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import kotlin.math.max
+import kotlin.math.min
 
 val point_count: Int = 50
 
@@ -83,10 +85,17 @@ class Point(var pos: Vector2, val id: Int) {
     var color: Vector3 = Vector3(MathUtils.random(), MathUtils.random(), MathUtils.random())
     fun repel(from: Vector2) {
         var direction = pos.cpy().sub(from)
-        val distance2 = direction.len2()/1000f + 0.1f
+        val distance2 = direction.len2()/1000f + 0.3f
 
         direction.nor()
         velocity.add(direction.scl((1f / distance2)))
+    }
+
+    fun repelSpawn(from: Vector2) {
+        var direction = pos.cpy().sub(from)
+//        val distance2 = direction.len() + 10f
+        direction.nor()
+        velocity.add(direction.scl(10f));
     }
 
 }
@@ -128,11 +137,22 @@ class MyController : InputProcessor {
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         touching = true
-        point_list.addFirst(Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId))
+        val new_point = Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId)
+        new_point.velocity = Vector2(MathUtils.random()*5, MathUtils.random()*5)
+        point_list.addFirst(new_point)
         nextPointId += 1
         if (point_list.size > point_count) {
             point_list.removeLast()
         }
+
+        for (point in point_list) {
+            if (point.id != new_point.id) {
+                // apply force on rhs:
+                point.repelSpawn(new_point.pos)
+            }
+        }
+
+
         return false
     }
 }
@@ -148,6 +168,9 @@ class LibGdxDemo : ApplicationAdapter() {
     private lateinit var shaderProgram: ShaderProgram
 
     override fun create() {
+        val screen_y = Gdx.graphics.getHeight()
+        val screen_x = Gdx.graphics.getWidth()
+
         batch = SpriteBatch()
         font = BitmapFont()
 
@@ -159,8 +182,10 @@ class LibGdxDemo : ApplicationAdapter() {
 
 
         for (i in 0..point_count-1) {
-            controller.point_list.addFirst(Point(Vector2(i.toFloat()*7, i.toFloat()*7), controller.nextPointId))
+            val new_point = Point(Vector2(screen_x / 2f + i*30, screen_y / 2f + i*30), controller.nextPointId)
             controller.nextPointId += 1
+            new_point.color = Vector3(0f, 0f, 0f)
+            controller.point_list.addFirst(new_point)
         }
 
         shapeRenderer = ShapeRenderer(5000, shaderProgram)
@@ -223,6 +248,23 @@ class LibGdxDemo : ApplicationAdapter() {
             rhs.repel(wall2)
             rhs.repel(wall3)
             rhs.repel(wall4)
+
+            if (rhs.pos.x < 0) {
+                rhs.pos.x = 0.1f;
+                rhs.velocity.x = max(rhs.velocity.x, 0f)
+            }
+            if (rhs.pos.y < 0) {
+                rhs.pos.y = 0.1f;
+                rhs.velocity.y = max(rhs.velocity.y, 0f)
+            }
+            if (rhs.pos.x > screen_x) {
+                rhs.pos.x = screen_x - 0.1f;
+                rhs.velocity.x = min(rhs.velocity.x, 0f)
+            }
+            if (rhs.pos.y > screen_y) {
+                rhs.pos.y = screen_y - 0.1f;
+                rhs.velocity.y = min(rhs.velocity.y, 0f)
+            }
         }
 
         shapeRenderer.begin(ShapeType.Filled);

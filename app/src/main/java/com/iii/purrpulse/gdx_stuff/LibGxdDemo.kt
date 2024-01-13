@@ -24,10 +24,12 @@ val point_count: Int = 50
 var position_array = FloatArray(point_count * 2);
 var color_array = FloatArray(point_count * 3)
 
+val use_highp = false
+
 fun fragment_shader() =
     """
     #ifdef GL_ES
-    precision mediump float;
+    precision ${if (use_highp) "highp" else "mediump"} float;
     #endif
     
     const int n = ${point_count};

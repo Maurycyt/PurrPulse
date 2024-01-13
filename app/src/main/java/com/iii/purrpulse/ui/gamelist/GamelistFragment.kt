@@ -30,6 +30,7 @@ class GamelistFragment : Fragment() {
             v.context.startActivity(intent)
         }
 
+
         fun setEasyGames() {
             title = "Mindless games"
             gamesList = easyGames

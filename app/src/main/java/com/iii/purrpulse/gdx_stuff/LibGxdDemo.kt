@@ -8,14 +8,16 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.math.MathUtils
 
 class Point(var pos: Vector2, val id: Int) {
     var velocity: Vector2 = Vector2(0f, 0f)
-
+    var color: Vector3 = Vector3(MathUtils.random(), MathUtils.random(), MathUtils.random())
     fun repel(from: Vector2) {
         var direction = pos.cpy().sub(from)
         val distance2 = direction.len2()/1000f + 0.1f
@@ -30,6 +32,7 @@ class MyController : InputProcessor {
     var touching: Boolean = false
 
     var point_list: ArrayDeque<Point> = ArrayDeque()
+    var color_list: ArrayDeque<Vector3> = ArrayDeque()
     private var nextPointId = 0
     override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         touching = false
@@ -96,7 +99,7 @@ class LibGdxDemo : ApplicationAdapter() {
         val screen_y = Gdx.graphics.getHeight()
         val screen_x = Gdx.graphics.getWidth()
 
-        Gdx.gl.glClearColor(1f, 0f, 0f, 1f)
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         batch.begin()
 //        if (font.scaleX < 30) {
@@ -132,7 +135,7 @@ class LibGdxDemo : ApplicationAdapter() {
             point.velocity.scl(0.997f)
             point.pos.add(point.velocity)
 
-            shapeRenderer.setColor(Color.BLACK);
+            shapeRenderer.setColor(point.color.x, point.color.y, point.color.z, 1.0f);
             shapeRenderer.begin(ShapeType.Filled);
             shapeRenderer.circle(point.pos.x, screen_y - point.pos.y, 10f);
             shapeRenderer.end();

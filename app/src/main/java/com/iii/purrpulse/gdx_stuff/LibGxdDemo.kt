@@ -211,7 +211,7 @@ class MyController : InputProcessor {
         clicked = true
         touching = true
         val new_point = Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId)
-        new_point.velocity = Vector2(MathUtils.random()*5, MathUtils.random()*5)
+        new_point.velocity = Vector2(MathUtils.random()*10-5, MathUtils.random()*10-5)
         nextPointId += 1
 
         if (point_list.size > point_count - 1) {

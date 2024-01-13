@@ -1,4 +1,4 @@
-package com.iii.purrpulse
+package com.iii.purrpulse.gdx_stuff
 
 
 import com.badlogic.gdx.ApplicationAdapter

@@ -1,6 +1,7 @@
 package com.iii.purrpulse.gdx_stuff
 
 
+import com.badlogic.gdx.Application
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputProcessor
@@ -19,6 +20,15 @@ val point_count: Int = 30
 
 fun fragment_shader() =
     """
+    const int n = 30;
+    
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
+    
+    uniform vec2 u_positions[n];
+    uniform vec3 u_colors[n];
+        
     void main() {
         gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
     }
@@ -26,10 +36,13 @@ fun fragment_shader() =
 
 fun vertex_shader() =
     """
-    attribute vec4 a_position;
+    attribute vec4 ${ShaderProgram.POSITION_ATTRIBUTE};
+    attribute vec4 ${ShaderProgram.COLOR_ATTRIBUTE};
+    attribute vec4 ${ShaderProgram.NORMAL_ATTRIBUTE};
+    uniform mat4 u_projModelView;
     
     void main() {
-        gl_Position =  a_position;
+        gl_Position =  u_projModelView * ${ShaderProgram.POSITION_ATTRIBUTE};
     }   
      
     """.trimIndent()
@@ -117,13 +130,23 @@ class LibGdxDemo : ApplicationAdapter() {
         controller = MyController()
         Gdx.input.inputProcessor = controller
 
-        shapeRenderer = ShapeRenderer()
-
         shaderProgram = ShaderProgram(vertex_shader(), fragment_shader())
+
+        shapeRenderer = ShapeRenderer(10000, shaderProgram)
 
 //        getFile("/raw/fragment.glsl")
 //        getFile("vertex.glsl")
 
+
+        Gdx.app.setLogLevel(Application.LOG_DEBUG);
+
+        if (!shaderProgram.isCompiled()) {
+            Gdx.app.error("MyTag", "shader compilation failed");
+            Gdx.app.error("MyTag", shaderProgram.getLog());
+        }
+        else {
+            Gdx.app.log("MyTag", "shader compilation ok");
+        }
 
     }
 
@@ -136,24 +159,19 @@ class LibGdxDemo : ApplicationAdapter() {
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
+        batch.begin()
+//        batch.setShader(shaderProgram)
+
         // set shader input:
 
-        val position_array = FloatArray(point_count * 2)
-        val color_array = FloatArray(point_count * 3)
+        val position_array = FloatArray(point_count )
+        val color_array = FloatArray(point_count )
 
-//        shaderProgram.setUniform2fv("u_positions", position_array, 0, point_count * 2)
-//        shaderProgram.setUniform3fv("u_colors", color_array, 0, point_count * 3)
+        shaderProgram.setUniform2fv("u_positions", position_array, 0, point_count * 2)
+        shaderProgram.setUniform3fv("u_colors", color_array, 0, point_count * 3)
 
-        batch.begin()
-        batch.setShader(shaderProgram)
-//
 
-//        if (font.scaleX < 30) {
-//            font.data.scale(1.1f)
-//        }
-//        if (controller.touching) {
-//            font.data.setScale(1f)
-//        }
+
 
         // physics:
         for (rhs in controller.point_list) {
@@ -187,15 +205,8 @@ class LibGdxDemo : ApplicationAdapter() {
             shapeRenderer.end();
         }
 
-//        font.draw(batch, "Hello", 100f, 40f)
-//        font.draw(batch, "Hello", controller.posX, Gdx.graphics.getHeight()-controller.posY)
         batch.end()
 
-//        count += 1
-//        if (count > 1000) {
-//            count = 0
-//            Gdx.app.exit()
-//        }
     }
 
     override fun dispose() {

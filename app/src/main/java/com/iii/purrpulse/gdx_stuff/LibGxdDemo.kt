@@ -4,16 +4,35 @@ package com.iii.purrpulse.gdx_stuff
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputProcessor
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.math.MathUtils
+
+val point_count: Int = 30
+
+fun fragment_shader() =
+    """
+    void main() {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+    """.trimIndent()
+
+fun vertex_shader() =
+    """
+    attribute vec4 a_position;
+    
+    void main() {
+        gl_Position =  a_position;
+    }   
+     
+    """.trimIndent()
 
 
 fun getFile(path: String): String {
@@ -74,7 +93,7 @@ class MyController : InputProcessor {
         touching = true
         point_list.addFirst(Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId))
         nextPointId += 1
-        if (point_list.size > 30) {
+        if (point_list.size > point_count) {
             point_list.removeLast()
         }
         return false
@@ -89,6 +108,7 @@ class LibGdxDemo : ApplicationAdapter() {
     private lateinit var font: BitmapFont
     private lateinit var controller: MyController
     private lateinit var shapeRenderer: ShapeRenderer
+    private lateinit var shaderProgram: ShaderProgram
 
     override fun create() {
         batch = SpriteBatch()
@@ -99,8 +119,12 @@ class LibGdxDemo : ApplicationAdapter() {
 
         shapeRenderer = ShapeRenderer()
 
+        shaderProgram = ShaderProgram(vertex_shader(), fragment_shader())
+
 //        getFile("/raw/fragment.glsl")
 //        getFile("vertex.glsl")
+
+
     }
 
     var count = 0;
@@ -111,7 +135,19 @@ class LibGdxDemo : ApplicationAdapter() {
 
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+
+        // set shader input:
+
+        val position_array = FloatArray(point_count * 2)
+        val color_array = FloatArray(point_count * 3)
+
+//        shaderProgram.setUniform2fv("u_positions", position_array, 0, point_count * 2)
+//        shaderProgram.setUniform3fv("u_colors", color_array, 0, point_count * 3)
+
         batch.begin()
+        batch.setShader(shaderProgram)
+//
+
 //        if (font.scaleX < 30) {
 //            font.data.scale(1.1f)
 //        }

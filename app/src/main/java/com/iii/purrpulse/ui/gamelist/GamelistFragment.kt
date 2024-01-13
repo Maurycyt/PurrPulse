@@ -16,7 +16,7 @@ class GamelistFragment : Fragment() {
     companion object {
         private var title : String = ""
 
-        private var gamesList : Array<String> = arrayOf()
+        private var gamesList : Array<String, > = arrayOf()
 
         fun setEasyGames() {
             title = "Mindless games"

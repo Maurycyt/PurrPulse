@@ -11,13 +11,17 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2
 
-class Point(var posX: Float, var posY: Float) { }
+class Point(var pos: Vector2, val id: Int) {
+    var velocity: Vector2 = Vector2(0f, 0f)
+}
 
 class MyController : InputProcessor {
     var touching: Boolean = false
 
     var point_list: ArrayDeque<Point> = ArrayDeque()
+    private var nextPointId = 0
     override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         touching = false
         return false
@@ -49,7 +53,8 @@ class MyController : InputProcessor {
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         touching = true
-        point_list.addFirst(Point(screenX.toFloat(), screenY.toFloat()))
+        point_list.addFirst(Point(Vector2(screenX.toFloat(), screenY.toFloat()), nextPointId))
+        nextPointId += 1
         if (point_list.size > 10) {
             point_list.removeLast()
         }
@@ -91,10 +96,27 @@ class LibGdxDemo : ApplicationAdapter() {
 //            font.data.setScale(1f)
 //        }
 
+        // physics:
+        for (lhs in controller.point_list) {
+            for (rhs in controller.point_list) {
+                if (lhs.id != rhs.id) {
+                    // apply force on rhs:
+                    val direction = rhs.pos.cpy().sub(lhs.pos).nor()
+                    val distance2 = direction.len2() + 0.1f
+
+                    rhs.velocity.add(direction.scl((1f / distance2) / 10f))
+
+
+                }
+            }
+        }
+
         for (point in controller.point_list) {
+            point.pos.add(point.velocity)
+
             shapeRenderer.setColor(Color.BLACK);
             shapeRenderer.begin(ShapeType.Filled);
-            shapeRenderer.circle(point.posX, screen_y - point.posY, 10f);
+            shapeRenderer.circle(point.pos.x, screen_y - point.pos.y, 10f);
             shapeRenderer.end();
         }
 

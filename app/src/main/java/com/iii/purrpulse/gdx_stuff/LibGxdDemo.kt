@@ -183,7 +183,7 @@ class LibGdxDemo : ApplicationAdapter() {
         // set shader input:
         for (i in 0..point_count - 1) {
             position_array[i*2 + 0] = controller.point_list.get(i).pos.x;
-            position_array[i*2 + 1] = controller.point_list.get(i).pos.y;
+            position_array[i*2 + 1] = screen_y - controller.point_list.get(i).pos.y;
             color_array[i*3 + 0] = controller.point_list.get(i).color.x;
             color_array[i*3 + 1] = controller.point_list.get(i).color.y;
             color_array[i*3 + 2] = controller.point_list.get(i).color.z;

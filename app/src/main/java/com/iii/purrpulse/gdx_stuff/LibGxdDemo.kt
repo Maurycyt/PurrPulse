@@ -35,7 +35,7 @@ fun fragment_shader() =
     void main() {
         vec2 position = gl_FragCoord.xy;
         float total_dist = 0.0;
-        vec3 final_color = vec3(0.1, 0., 0.1);
+        vec3 final_color = vec3(0.1, 0.1, 0.1);
         for (int i = 0; i < n; i++) {
             float dist = distance(u_positions[i], position);
             total_dist += (1.0 / (1.0 + dist * dist));
@@ -193,7 +193,6 @@ class LibGdxDemo : ApplicationAdapter() {
 
         shaderProgram.setUniform2fv("u_positions", position_array, 0, position_array.size)
         shaderProgram.setUniform3fv("u_colors", color_array, 0, color_array.size)
-//        shaderProgram.setUniformf("white", 0.9f);
 
         batch.begin()
 

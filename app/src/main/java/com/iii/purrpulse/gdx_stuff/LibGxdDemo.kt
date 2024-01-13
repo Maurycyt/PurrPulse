@@ -24,7 +24,7 @@ var color_array = FloatArray(point_count * 3)
 fun fragment_shader() =
     """
     #ifdef GL_ES
-    precision highp float;
+    precision mediump float;
     #endif
     
     const int n = ${point_count};

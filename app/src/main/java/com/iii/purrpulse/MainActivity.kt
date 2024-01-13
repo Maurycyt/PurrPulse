@@ -13,8 +13,10 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.iii.purrpulse.databinding.ActivityMainBinding
+import com.iii.purrpulse.ui.gamelist.GamelistFragment
 
 class MainActivity : AppCompatActivity() {
+
 
     private lateinit var binding: ActivityMainBinding
 
@@ -44,6 +46,14 @@ class MainActivity : AppCompatActivity() {
             NavigationUI.onNavDestinationSelected(item, navController)
 
             return@setOnItemSelectedListener true
+        }
+
+        // Set up OnDestinationChangedListener
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+
+            if (destination.id == R.id.navigation_gamelist) {
+                supportActionBar?.title = GamelistFragment.getTitle();
+            }
         }
 
         val libGDXLauncherBtn : Button = findViewById(R.id.libGDXLauncherBtn) as Button

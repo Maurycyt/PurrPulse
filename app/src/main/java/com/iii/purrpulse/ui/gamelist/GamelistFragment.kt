@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.iii.purrpulse.databinding.FragmentGamelistBinding
 
@@ -33,13 +32,15 @@ class GamelistFragment : Fragment() {
             title = "Mindful games"
             gamesList = arrayOf("Mindful game 1", "Mindful game 2", "Mindful game 3")
         }
+
+        fun getTitle() : String {
+            return title;
+        }
     }
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,9 +49,6 @@ class GamelistFragment : Fragment() {
 
         _binding = FragmentGamelistBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
-        val actionBar = (activity as? AppCompatActivity)?.supportActionBar
-        actionBar?.setTitle(title)
 
         val ll = binding.gamesList
 

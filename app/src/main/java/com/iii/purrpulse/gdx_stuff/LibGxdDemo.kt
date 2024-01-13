@@ -4,15 +4,22 @@ package com.iii.purrpulse.gdx_stuff
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputProcessor
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.math.Vector2
 
+
+fun getFile(path: String): String {
+//    This does not want to work :(
+    var handle = Gdx.files.internal(path)
+    var text = handle.readString()
+    return text
+}
 class Point(var pos: Vector2, val id: Int) {
     var velocity: Vector2 = Vector2(0f, 0f)
 
@@ -88,6 +95,9 @@ class LibGdxDemo : ApplicationAdapter() {
         Gdx.input.inputProcessor = controller
 
         shapeRenderer = ShapeRenderer()
+
+//        getFile("/raw/fragment.glsl")
+//        getFile("vertex.glsl")
     }
 
     var count = 0;

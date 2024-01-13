@@ -8,5 +8,6 @@
     <string name="game_selection_1">Mindless</string>
     <string name="game_selection_2">Semi-Mindful</string>
     <string name="game_selection_3">Mindful</string>
+    <string name="quality_switch_text">High Quality</string>
 
 </resources>

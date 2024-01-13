@@ -27,9 +27,8 @@ val point_count: Int = 50
 var position_array = FloatArray(point_count * 2);
 var color_array = FloatArray(point_count * 3)
 
-val use_highp = false
+var use_highp = false
 var delete_closest = false
-
 
 var central_hue_setting = 300f
 var hue_spread_setting = 100f

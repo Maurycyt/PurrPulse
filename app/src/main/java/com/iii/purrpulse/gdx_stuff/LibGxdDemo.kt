@@ -24,31 +24,26 @@ var color_array = FloatArray(point_count * 3)
 fun fragment_shader() =
     """
     #ifdef GL_ES
-    precision mediump float;
+    precision highp float;
     #endif
     
     const int n = ${point_count};
     
     uniform vec2 u_positions[n];
     uniform vec3 u_colors[n];
-    
-    float dist2(vec2 a, vec2 b) {
-        vec2 c = a - b;
-        return c.x * c.x + c.y * c.y;
-    }
-    
+            
     void main() {
         vec2 position = gl_FragCoord.xy;
-        vec3 final_color = u_colors[0];
-        float min_dist = dist2(u_positions[0], position);
-        for (int i = 1; i < n; i++) {
-            if (dist2(u_positions[i], position) < min_dist) {
-                min_dist = dist2(u_positions[i], position);
-                final_color = u_colors[i];
-            }
+        float total_dist = 0.0;
+        vec3 final_color = vec3(0.1, 0.1, 0.1);
+        for (int i = 0; i < n; i++) {
+            float dist = distance(u_positions[i], position);
+            total_dist += (1.0 / (1.0 + dist * dist * dist * dist * dist * dist * dist * dist));
         }
-        if (min_dist > 250.0*250.0) {
-            final_color = vec3(0.0, 0.0, 0.0);
+        total_dist *= 1.25;
+        for (int i = 0; i < n; i++) {
+            float dist = distance(u_positions[i], position);
+            final_color += u_colors[i] * ((1.0 / (1.0 + dist * dist * dist * dist * dist * dist * dist * dist))/total_dist);
         }
         gl_FragColor = vec4(final_color, 1.0);
     }

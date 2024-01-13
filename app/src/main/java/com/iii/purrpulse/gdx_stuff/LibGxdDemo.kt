@@ -31,14 +31,13 @@ fun fragment_shader() =
     
     uniform vec2 u_positions[n];
     uniform vec3 u_colors[n];
-    
-    varying vec2 v_position;
             
     void main() {
-        float min_dist = distance(u_positions[0], v_position);
+        vec2 position = gl_FragCoord.xy;
+        float min_dist = distance(u_positions[0], position);
         vec3 final_color = u_colors[0];
         for (int i = 1; i < n; i++) {
-            float dist = distance(u_positions[i], v_position);
+            float dist = distance(u_positions[i], position);
             if (dist < min_dist) {
                 min_dist = dist;
                 final_color = u_colors[i];
@@ -56,11 +55,8 @@ fun vertex_shader() =
     attribute vec4 ${ShaderProgram.NORMAL_ATTRIBUTE};
     
     uniform mat4 u_projModelView;
-    
-    varying vec2 v_position;   
 
     void main() {
-        v_position = a_position.xy;
         gl_Position =  u_projModelView * ${ShaderProgram.POSITION_ATTRIBUTE};
     }   
      

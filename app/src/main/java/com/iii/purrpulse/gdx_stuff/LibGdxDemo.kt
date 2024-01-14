@@ -314,7 +314,7 @@ class LibGdxDemo : ApplicationAdapter() {
         shapeRenderer = ShapeRenderer(5000, shaderProgram)
 
 
-        Gdx.app.setLogLevel(Application.LOG_DEBUG);
+        Gdx.app.setLogLevel(Application.LOG_NONE);
 
         if (!shaderProgram.isCompiled()) {
             Gdx.app.error("MyTag", "shader compilation failed");

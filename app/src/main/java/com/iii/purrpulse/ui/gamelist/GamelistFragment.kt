@@ -25,10 +25,21 @@ class GamelistFragment : Fragment() {
             GameListing("Balls", ::launchlibBalls),
             GameListing("Tessellation", ::launchlibTesselation),
             GameListing("Light", ::launchlibFlames),
-            GameListing("Canvas", ::launchlibCanvas),
         )
 
-        private val midGames = arrayOf(GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing())
+        private val midGames = arrayOf(
+            GameListing("Canvas", ::launchlibCanvas),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing()
+        )
 
         private val hardGames = arrayOf(GameListing(), GameListing())
 

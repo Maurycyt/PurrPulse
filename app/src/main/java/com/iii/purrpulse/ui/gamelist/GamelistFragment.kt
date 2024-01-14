@@ -23,14 +23,26 @@ class GamelistFragment : Fragment() {
 
         private val easyGames = arrayOf(
             GameListing("Balls", ::launchlibBalls),
+            GameListing("Clicker", ::launchlibClicker),
             GameListing("Tessellation", ::launchlibTesselation),
             GameListing("Light", ::launchlibFlames),
+        )
+
+        private val midGames = arrayOf(
             GameListing("Canvas", ::launchlibCanvas),
         )
 
-        private val midGames = arrayOf(GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing(), GameListing())
-
-        private val hardGames = arrayOf(GameListing(), GameListing())
+        private val hardGames = arrayOf(GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing(),
+            GameListing())
 
         fun launchlibBalls(v : View) {
             launcher_mode = LauncherMode.Balls
@@ -50,6 +62,12 @@ class GamelistFragment : Fragment() {
         }
         fun launchlibFlames(v : View) {
             launcher_mode = LauncherMode.Flames
+            val intent = Intent(v.context, Launcher::class.java)
+            v.context.startActivity(intent)
+        }
+
+        fun launchlibClicker(v : View) {
+            launcher_mode = LauncherMode.Clicker
             val intent = Intent(v.context, Launcher::class.java)
             v.context.startActivity(intent)
         }

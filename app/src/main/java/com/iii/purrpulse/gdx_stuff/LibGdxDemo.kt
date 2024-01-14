@@ -143,13 +143,6 @@ fun vertex_shader() =
      
     """.trimIndent()
 
-
-fun getFile(path: String): String {
-//    This does not want to work :(
-    var handle = Gdx.files.internal(path)
-    var text = handle.readString()
-    return text
-}
 class Point(var pos: Vector2, val id: Int) {
     var velocity: Vector2 = Vector2(0f, 0f)
     var color: Color = Color().fromHsv((central_hue + (MathUtils.random() - 0.5f) * hue_spread).mod(360f), 1f, 0.35f + MathUtils.random() * 0.5f)
@@ -314,7 +307,7 @@ class LibGdxDemo : ApplicationAdapter() {
         shapeRenderer = ShapeRenderer(5000, shaderProgram)
 
 
-        Gdx.app.setLogLevel(Application.LOG_DEBUG);
+        Gdx.app.setLogLevel(Application.LOG_NONE);
 
         if (!shaderProgram.isCompiled()) {
             Gdx.app.error("MyTag", "shader compilation failed");
@@ -422,7 +415,6 @@ class LibGdxDemo : ApplicationAdapter() {
 
     override fun dispose() {
         batch.dispose()
-//        img.dispose()
     }
 
 

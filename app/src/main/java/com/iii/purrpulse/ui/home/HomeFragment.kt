@@ -1,5 +1,6 @@
 package com.iii.purrpulse.ui.home
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.iii.purrpulse.R
 import com.iii.purrpulse.databinding.FragmentHomeBinding
+import com.iii.purrpulse.gdx_stuff.use_highp
 import com.iii.purrpulse.ui.gamelist.GamelistFragment
 
 class HomeFragment : Fragment() {
@@ -32,6 +34,10 @@ class HomeFragment : Fragment() {
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
+
+        // Read preferences.
+        val sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE)
+        use_highp = sharedPreferences.getBoolean("isHighQualityOn", false)
 
         /*val textView: TextView = binding.textHome
         homeViewModel!!.text.observe(viewLifecycleOwner) {

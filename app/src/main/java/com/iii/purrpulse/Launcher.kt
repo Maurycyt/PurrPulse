@@ -5,9 +5,10 @@ import android.os.Bundle
 import com.badlogic.gdx.backends.android.AndroidApplication
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration
 import com.iii.purrpulse.gdx_stuff.LibGdxDemo
+import com.iii.purrpulse.gdx_stuff.ClickerGDX
 
 enum class LauncherMode {
-    None, Balls, Tesselation, Canvas, Flames,
+    None, Balls, Tesselation, Canvas, Flames, Clicker
 }
 
 var launcher_mode = LauncherMode.None
@@ -28,6 +29,9 @@ class Launcher : AndroidApplication() {
         }
         else if (launcher_mode == LauncherMode.Canvas) {
             initialize(LibGdxDemo(), config)
+        }
+        else if (launcher_mode == LauncherMode.Clicker) {
+            initialize(ClickerGDX(), config)
         }
     }
 }

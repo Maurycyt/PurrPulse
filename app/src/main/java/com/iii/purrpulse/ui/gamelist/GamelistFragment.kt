@@ -25,6 +25,7 @@ class GamelistFragment : Fragment() {
             GameListing("Balls", ::launchlibBalls),
             GameListing("Tessellation", ::launchlibTesselation),
             GameListing("Light", ::launchlibFlames),
+            GameListing("Clicker", ::launchlibClicker),
         )
 
         private val midGames = arrayOf(
@@ -61,6 +62,12 @@ class GamelistFragment : Fragment() {
         }
         fun launchlibFlames(v : View) {
             launcher_mode = LauncherMode.Flames
+            val intent = Intent(v.context, Launcher::class.java)
+            v.context.startActivity(intent)
+        }
+
+        fun launchlibClicker(v : View) {
+            launcher_mode = LauncherMode.Clicker
             val intent = Intent(v.context, Launcher::class.java)
             v.context.startActivity(intent)
         }
